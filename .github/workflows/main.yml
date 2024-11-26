@@ -1,0 +1,39 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Build Docker image
+        run: docker build . -t my-python-app
+
+      - name: Run Tests
+        run: |
+          pytest
+
+      - name: Scan Docker image for vulnerabilities
+        run: |
+          trivy image my-python-app 
+
+      - name: Deploy to Production
+        run: |
+          echo "Desplegando a producción"
+          # Aquí colocarías el comando para tu despliegue en el entorno que uses (ej. AWS, GCP, etc.)
