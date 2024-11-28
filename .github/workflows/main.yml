@@ -39,3 +39,15 @@ jobs:
       - name: Run Trivy scan
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest --exit-code 1 --severity HIGH,CRITICAL imagenk
+
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Bandit
+        run: |
+          pip install bandit
+          bandit -r .
