@@ -3,37 +3,48 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - main  # Se ejecuta cuando hay un push en la rama 'main'
 
 jobs:
+  # Trabajo para construir y probar la aplicación
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Emplea la última versión de Ubuntu
 
     steps:
+      # Paso 1: Clonar código desde el repositorio
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Paso 2: Configurar Python
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.9'  # Version de Python
 
+      # Paso 3: Instalar dependencias
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
 
+      # Paso 4: Construir la imagen Docker
       - name: Build Docker image
-        run: docker build . -t my-python-app
+        run: docker build . -t App-Prueba-Docker
 
+      # Paso 5: Ejecutar pruebas
       - name: Run Tests
         run: |
-          pytest
+          pytest  # Realiza pruebas usando pytest
 
+      # Paso 6: Escanear imagen Docker en busca de vulnerabilidades
       - name: Scan Docker image for vulnerabilities
         run: |
-          trivy image my-python-app 
+          trivy image App-Prueba-Docker  # Asegúrate de haber instalado Trivy en tu entorno o define cómo instalarlo
 
+      # Paso 7: Desplegar en producción
       - name: Deploy to Production
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Clave de acceso de AWS
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Clave secreta de AWS
         run: |
-          echo "Desplegando a producción"
-          # Aquí colocarías el comando para tu despliegue en el entorno que uses (ej. AWS, GCP, etc.)
+          #Utilizando AWS CLI para actualizar el servicio en ECS
+          aws ecs update-service --cluster my-cluster --service my-service --desired-count 1
